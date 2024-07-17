@@ -1,0 +1,338 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="{% static "core/css/style.css" %}">
+	<link rel="icon" type="image/x-icon" href="{% static 'core/img/preview_2.png' %}">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+	<title>Gestionar productos</title>
+</head>
+<body>
+	{% include "./navegacion.html" %}
+	<hr id="seccion_gestionar_productos">
+	<div>
+		<button type="button" class="btn me-md-2 btn-custom-outline" style="position: absolute; left: 1rem;" onclick="location.href='{% url 'panel_admin' %}'"><i class="bi bi-caret-left"></i> Volver al panel</button>
+		<h1 class="text-center">Agregar un producto</h1>
+	</div>
+	<br>
+	<main class="container">
+		<div class="row">
+			<!--Formulario -->
+			<div class="col-md-6">
+				<form class="row g-3 text-center" id="datos_producto" method="post" enctype="multipart/form-data" autocomplete="off">
+					{% csrf_token %}
+					<div class="input-group mb-3">
+						<span class="input-group-text">
+							<i class="bi bi-123"></i>
+						</span>
+						<div class="form-floating">
+							<input type="number" class="form-control shadow-none" id="campo_id" name="campo_id" placeholder="" disabled>
+							<label for="campo_id" class="form-label">ID (campo gestionado automáticamente)</label>
+						</div>
+					</div>
+
+					<div class="input-group mb-3">
+						<span class="input-group-text">
+							<i class="bi bi-alphabet"></i>
+						</span>
+						<div class="form-floating">
+							<input type="text" class="input-custom form-control shadow-none" id="campo_nombre" name="campo_nombre" placeholder="" required>
+							<label for="campo_nombre">Nombre del producto</label>
+						</div>
+						<span class="input-group-text">
+							<i class="bi bi-currency-dollar"></i>
+						</span>
+						<div class="form-floating">
+							<input type="number" class="input-custom form-control shadow-none" id="campo_precio" placeholder="" name="campo_precio" step="0.01" required>
+							<label for="campo_precio" class="form-label">Precio del producto</label>
+						</div>
+					</div>
+
+					<div class="input-group mb-3">
+						<span class="input-group-text">
+							<i class="bi bi-alphabet"></i>
+						</span>
+						<div class="form-floating">
+							<textarea class="input-custom form-control shadow-none" id="campo_descripcion" name="campo_descripcion" style="height: 100px; resize: none;" placeholder="" required></textarea>
+							<label for="campo_descripcion">Descripción del producto</label>
+						</div>
+					</div>
+
+					<div class="input-group mb-3">
+						<span class="input-group-text">
+							<i class="bi bi-journals"></i>
+						</span>
+						<div class="form-floating">
+							<select class="input-custom form-select shadow-none" id="campo_categoria" name="campo_categoria" aria-label="Categoría" required>
+								<option value="" disabled selected>Selecciona una categoría</option>
+								{% for categoria in categorias %}
+									<option value="{{categoria}}">{{categoria}}</option>
+								{% endfor %}
+							</select>
+							<label for="campo_categoria">Categoría</label>
+						</div>
+					</div>
+
+					<div class="input-group mb-3">
+						<span class="input-group-text">
+							$
+						</span>
+						<div class="form-floating">
+							<input type="number" class="input-custom form-control shadow-none" id="campo_descuento_sub" name="campo_descuento_sub" placeholder="" required>
+							<label for="campo_descuento_sub" class="form-label">Precio arriendo</label>
+						</div>
+						<span class="input-group-text">
+							%
+						</span>
+						<div class="form-floating">
+							<input type="number" class="input-custom form-control shadow-none" id="campo_descuento_oferta" name="campo_descuento_oferta" placeholder="" required>
+							<label for="campo_descuento_oferta" class="form-label">Descuento por oferta</label>
+						</div>
+					</div>
+
+					<div class="input-group mb-3">
+						<span class="input-group-text">
+							<i class="bi bi-image"></i>
+						</span>
+						<input type="file" class="form-control" id="campo_foto" name="campo_foto" accept="image/*">
+					</div>
+
+					<div class="col-12">
+						<button type="button" class="btn btn-custom-outline w-25 mx-2" id="btn-guardar" style="display: none;"><i class="bi bi-floppy"></i> Guardar</button>
+						<button type="button" class="btn btn-custom-outline w-25 mx-2" id="btn-cancelar" style="display: none;"><i class="bi bi-x-octagon"></i> Cancelar</button>
+						<button type="button" class="btn btn-custom-outline w-25 mx-2" id="btn-nuevo"><i class="bi bi-plus-circle"></i> Nuevo</button>
+						<button type="button" class="btn btn-custom-outline w-25 mx-2" id="btn-importar"><i class="bi bi-download"></i> Importar JSON</button>
+						<input type="file" name="json-input" id="json-input" accept=".json", style="display: none;">
+					</div>
+				</form>
+			</div>
+			<div class="col-md-6">
+				<div class="col-md-12 d-flex justify-content-center align-items-center" style="border-color: #57C4AE; border-style: dashed;">
+					<h4 id="imgPreviewTxt">Vista previa de la imágen.</h4>
+					<img id="imagenSeleccionada" src="#" alt="" style="max-width: 400px; height: 400px;">
+				</div>
+			</div>
+		</div>
+		<hr class="mt-4">
+		<!-- Tabla de productos -->
+		<div class="col-md-12 mt-4">
+			<h1 class="text-center">Productos disponibles</h1>
+			<br>
+			<div class="d-flex w-100 align-items-center">
+				<div class="d-flex flex-column col-3 p-2" id="left-nav-part"></div>
+				<div class="d-flex col-6 p-2 justify-content-center align-items-center" id="middle-nav-part">
+					<div class="input-group">
+						<div class="form-floating">
+							<input type="search" id="campo_busqueda_gestionar_prod" class="input-custom form-control form-control-lg shadow-none" placeholder="">
+							<label for="campo_busqueda_gestionar_prod" class="form-label">Escribe para comenzar a filtrar</label>
+						</div>
+					</div>
+				</div>
+				<div class="d-flex col-3 p-2 justify-content-end align-items-center" id="right-nav-part"></div>
+			</div>
+			<br>
+			<table class="table table-dark table-striped" id="tablaProductos">
+				<thead class="sticky-top">
+					<tr>
+						<th></th>
+						<th>ID</th>
+						<th style="width: 15rem;">Nombre</th>
+						<th style="width: 25rem">Descripción</th>
+						<th>Precio</th>
+						<th>Categoría</th>
+						<th>% Dscto.</th>
+						<th>% Precio arriendo</th>
+						<th>Acciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for producto in productos %}
+						<tr data-id="{{producto.id}}">								
+							<td class="producto-img" style="text-align: center;"><img src="{% if producto.imagen %}{{ producto.imagen.url }}{% else %}{% static 'core/img/user_sample.jpg' %}{% endif %}" alt="{{producto.nombre}}" style="width: 35px; height: 35px;"></td>
+							<td class="producto-id">#{{producto.id}}</td>
+							<td class="producto-nombre">{{producto.nombre}}</td>
+							<td class="producto-descripcion">{{producto.descripcion}}</td>
+							<td class="producto-precio">${{producto.precio}}</td>
+							<td class="producto-categoria">{{producto.categoria}}</td>
+							<td class="producto-descuento">{{producto.descuento}}%</td>
+							<td class="producto-descuento-subs">{{producto.precio_arriendo}}</td>
+							<td>
+								<button type="submit" class="btn btn-custom-outline btn-sm btn-editar-prod" data-img="{{producto.imagen.url}}" data-id="{{producto.id}}"><i class="bi bi-pencil"></i> Editar</button>
+								<form method="post" action="{% url 'eliminar_producto' producto.id %}" style="display: inline;">
+									{% csrf_token %}
+									<button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i> Eliminar</button>
+								</form>
+							</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</main>
+	<hr>
+	{% include './footer.html' %}
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+	<script src="{% static 'core/js/validador_productos.js' %}"></script>
+	<script type="module">
+		import { getCookie } from "/static/core/js/utils.js"
+
+		document.addEventListener("DOMContentLoaded", function() {
+			const botonesEditar = document.querySelectorAll(".btn-editar-prod")
+			const btnCancelar = document.getElementById("btn-cancelar")
+			const campoFoto = document.getElementById("campo_foto")
+			const imgSeleccionada = document.getElementById("imagenSeleccionada")
+			const imgPreviewTxt = document.getElementById("imgPreviewTxt")
+
+			const filtrarProductosTabla = document.getElementById("campo_busqueda_gestionar_prod")
+			const tablaProductos = document.getElementById("tablaProductos").getElementsByTagName("tbody")[0]
+			const filaProductos = tablaProductos.getElementsByTagName("tr")
+
+			filtrarProductosTabla.addEventListener("input", function() {
+				const busqueda = this.value.trim().toLowerCase()
+				Array.from(filaProductos).forEach(function(fila) {
+					const nombreProducto = fila.querySelector(".producto-nombre").textContent.trim().toLowerCase()
+					if (nombreProducto.includes(busqueda)) {
+						fila.style.display = "table-row"
+					} else {
+						fila.style.display = "none"
+					}
+				})
+			})
+		
+			campoFoto.addEventListener("change", function() {
+				const file =this.files[0]
+				if (file) {
+					mostrarIMG(file)
+				}
+
+				function mostrarIMG(file) {
+					const reader = new FileReader()
+					reader.onload = function(event) {
+						imgSeleccionada.src = event.target.result
+					}
+					reader.readAsDataURL(file)
+					imgPreviewTxt.style.display = "none"
+				}
+			})
+
+			//Todos los botones de "Editar"
+			botonesEditar.forEach(boton => {
+				boton.addEventListener("click", function() {
+					const idProducto = this.getAttribute("data-id")
+					const nombreProducto = this.closest("tr").querySelector(".producto-nombre").textContent
+					const descripcionProducto = this.closest("tr").querySelector(".producto-descripcion").textContent
+					const precioProducto = this.closest("tr").querySelector(".producto-precio").textContent.replace("$", "")
+					const categoriaProducto = this.closest("tr").querySelector(".producto-categoria").textContent
+					const descuentoProducto = this.closest("tr").querySelector(".producto-descuento").textContent.replace("%", "")
+					const descuentoSubsProducto = this.closest("tr").querySelector(".producto-descuento-subs").textContent.replace("%", "")
+					const imgProducto = this.closest("tr").querySelector(".producto-img").src
+					const dataIMG = this.getAttribute("data-img")
+
+					document.querySelector("#campo_id").value = idProducto
+					document.querySelector("#campo_nombre").value = nombreProducto
+					document.querySelector("#campo_descripcion").value = descripcionProducto
+					document.querySelector("#campo_precio").value = parseInt(precioProducto)
+					document.querySelector("#campo_categoria").value = categoriaProducto
+					document.querySelector("#campo_descuento_oferta").value = parseFloat(descuentoProducto)
+					document.querySelector("#campo_descuento_sub").value = parseFloat(descuentoSubsProducto)
+
+					document.getElementById("btn-guardar").style.display = "inline-block"
+					document.getElementById("btn-cancelar").style.display = "inline-block"
+					document.getElementById("btn-nuevo").style.display = "none"
+					document.getElementById("btn-importar").style.display = "none"
+
+					imgSeleccionada.src = dataIMG
+					imgPreviewTxt.style.display = "none"
+					/* imgPreviewTxt.style.display = "inline-block" */
+
+					const seccionGestionarProductos = document.querySelector("#seccion_gestionar_productos")
+					seccionGestionarProductos.scrollIntoView({ behavior: "smooth"})
+
+				})
+			})
+
+			//Botón guardar cambios
+			document.getElementById("btn-guardar").addEventListener("click", function() {
+				var productoId = document.getElementById("campo_id").value
+				var actionUrl = "/editar_producto/" + productoId + "/"
+				document.getElementById("datos_producto").action = actionUrl
+				document.getElementById("datos_producto").submit()
+
+				document.getElementById("btn-guardar").style.display = "none"
+				document.getElementById("btn-cancelar").style.display = "none"
+				document.getElementById("btn-nuevo").style.display = "inline-block"
+				document.getElementById("btn-importar").style.display = "inline-block"
+			})
+
+			//Botón añadir producto
+			document.getElementById("btn-nuevo").addEventListener("click", function() {
+				document.getElementById("datos_producto").action = "{% url 'agregar_productos' %}"
+				document.getElementById("datos_producto").submit()
+			})
+
+			//Botón cancelar edición
+			btnCancelar.addEventListener("click", function() {
+				const camposFormulario = document.getElementById("datos_producto").getElementsByTagName("input")
+				const textareaFormulario = document.getElementById("datos_producto").getElementsByTagName("textarea")
+				const categoriaProducto = document.getElementById("datos_producto").getElementsByTagName("select")
+				
+				for (let i = 0; i < camposFormulario.length; i++) { camposFormulario[i].value = "" }
+				for (let i = 0; i < textareaFormulario.length; i++) { textareaFormulario[i].value = "" }
+				for (let i = 0; i < categoriaProducto.length; i++) { categoriaProducto[i].value = "" }
+
+				document.getElementById("datos_producto").action = ""
+
+				document.getElementById("btn-guardar").style.display = "none"
+				document.getElementById("btn-cancelar").style.display = "none"
+				document.getElementById("btn-nuevo").style.display = "inline-block"
+				document.getElementById("btn-importar").style.display = "inline-block"
+
+				imgSeleccionada.src = ""
+				imgPreviewTxt.style.display = "inline-block"
+			})
+
+			//Botón importar desde JSON
+			document.getElementById("btn-importar").addEventListener("click", function() {
+				document.getElementById("json-input").click()
+			})
+
+			document.getElementById("json-input").addEventListener("change", function(event) {
+				const archivo = event.target.files[0]
+				if (archivo) {
+					const reader = new FileReader()
+					reader.onload = function(e) {
+						try {
+							const json = JSON.parse(e.target.result)
+
+							fetch("/importar_productos/", {
+								method: "POST",
+								headers: {
+									"Content-Type": "application/json",
+									"X-CSRFToken": getCookie("csrftoken", document)
+								},
+								body: JSON.stringify(json)
+							})
+							.then(response => response.json())
+							.then(data => {
+								console.log("Respuesta del servidor:", data)
+								alert("Productos importados correctamente.")
+							})
+							.catch(error => {
+								console.error("Error al importar los productos:", error)
+								alert("No se pudieron importar los productos.")
+							})
+						} catch (error) {
+							console.error("Error al parsear el JSON:", error)
+						}
+					}
+					reader.readAsText(archivo)
+				}
+			})
+		})
+	</script>
+</body>
+</html>

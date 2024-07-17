@@ -1,0 +1,265 @@
+@import url('https://fonts.googleapis.com/css?family=Lato|Liu+Jian+Mao+Cao&display=swap');
+
+.contenedor {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+}
+
+.tarjeta {
+	width: 400px;
+	height: 260px;
+	border-radius: 20px;
+	background-color: #007bff;
+	box-shadow: 0 15px 25px rgba(0,0,0,.5);
+	cursor: pointer;
+	transition: .5s;
+	position: relative;
+	transform-style: preserve-3d;
+	transform: perspective(1000px);
+}
+
+.tarjeta.active {
+	transform: perspective(1000px) rotateY(180deg);
+}
+
+.tarjeta .delantera,
+.tarjeta .trasera {
+	width: 100%;
+	height: 100%;
+	border-radius: 20px;
+	position: absolute;
+	left: 0;
+	top: 0;
+	backface-visibility: hidden;
+	transform-style: preserve-3d;
+}
+
+.tarjeta .delantera {
+	z-index: 2;
+	transform: rotateY(0deg);
+}
+
+.tarjeta .trasera {
+	z-index: 1;
+	transform: rotateY(180deg);
+	background-color: #007bff;
+}
+
+.tarjeta .logo-marca {
+	height: 70px;
+	display: flex;
+	justify-content: flex-end;
+	align-items: flex-end;
+}
+
+.tarjeta .logo-marca img {
+	width: 80px;
+	margin-right: 20px;
+	margin-top: 10px;
+}
+
+.tarjeta .chip {
+	width: 60px;
+	margin-left: 20px;
+}
+
+.tarjeta .datos {
+	width: 100%;
+	padding: 10px 20px 0 20px;
+}
+
+.tarjeta .datos .grupo {
+	color: #fff;
+	letter-spacing: 1px;
+	margin-bottom: 15px;
+}
+
+.tarjeta .datos .grupo p {
+	margin: 0;
+}
+
+.tarjeta .datos .grupo .label {
+	font-size: 12px;
+	opacity: .8;
+}
+
+.tarjeta .datos .grupo .numero {
+	font-size: 25px;
+	font-family: 'Liu Jian Mao Cao', cursive;
+	letter-spacing: 2px;
+}
+
+.tarjeta .datos .flexbox {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.tarjeta .datos .flexbox .nombre {
+	text-transform: uppercase;
+	font-size: 20px;
+}
+
+.tarjeta .datos .flexbox .expiracion {
+	font-size: 20px;
+}
+
+.tarjeta .datos .flexbox .expiracion .mes {
+	margin-right: 5px;
+}
+
+.tarjeta .barra-magnetica {
+	width: 100%;
+	height: 50px;
+	margin-bottom: 30px;
+	background-color: rgba(0,0,0,.8);
+}
+
+.tarjeta .datos .grupo .firma {
+	color: #fff;
+	text-transform: uppercase;
+}
+
+.tarjeta .datos .grupo .firma p {
+	margin-top: 0;
+}
+
+.tarjeta .datos .grupo .ccv {
+	font-size: 20px;
+	font-family: 'Liu Jian Mao Cao', cursive;
+	letter-spacing: 2px;
+}
+
+.tarjeta .leyenda {
+	margin: 0 20px;
+	color: #fff;
+	font-size: 12px;
+	letter-spacing: 1px;
+	text-align: center;
+}
+
+.tarjeta .link-banco {
+	color: #fff;
+	margin-top: 5px;
+	display: block;
+	text-decoration: none;
+	font-size: 12px;
+	text-align: center;
+}
+
+.contenedor-btn {
+	margin-top: 30px;
+}
+
+.contenedor-btn .btn-abrir-formulario {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 55px;
+	height: 55px;
+	background-color: #007bff;
+	color: #fff;
+	border-radius: 50%;
+	border: none;
+	font-size: 22px;
+	box-shadow: 0 5px 10px rgba(0,0,0,.2);
+	cursor: pointer;
+	transition: .5s;
+}
+
+.contenedor-btn .btn-abrir-formulario.active {
+	transform: rotate(315deg);
+}
+
+.formulario-tarjeta {
+	display: none;
+	flex-direction: column;
+	width: 100%;
+	max-width: 400px;
+	padding: 20px;
+	background-color: #fff;
+	border-radius: 20px;
+	box-shadow: 0 15px 25px rgba(0,0,0,.5);
+	margin-top: 30px;
+}
+
+.formulario-tarjeta.active {
+	display: flex;
+}
+
+.formulario-tarjeta .grupo {
+	width: 100%;
+	margin-bottom: 20px;
+}
+
+.formulario-tarjeta .grupo label {
+	font-size: 16px;
+	color: #007bff;
+	letter-spacing: 1px;
+	margin-bottom: 5px;
+}
+
+.formulario-tarjeta .grupo input {
+	width: 100%;
+	height: 40px;
+	border: none;
+	background-color: #e7e7e7;
+	border-radius: 10px;
+	padding: 0 10px;
+	font-size: 20px;
+	letter-spacing: 1px;
+	color: #007bff;
+}
+
+.formulario-tarjeta .flexbox {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.formulario-tarjeta .flexbox .grupo {
+	width: calc(50% - 5px);
+	margin-bottom: 20px;
+}
+
+.formulario-tarjeta .grupo-select {
+	position: relative;
+	width: 100%;
+}
+
+.formulario-tarjeta .grupo-select select {
+	width: 100%;
+	height: 40px;
+	border: none;
+	background-color: #e7e7e7;
+	border-radius: 10px;
+	padding: 0 10px;
+	font-size: 16px;
+	letter-spacing: 1px;
+	color: #007bff;
+	appearance: none;
+	-moz-appearance: none;
+	-webkit-appearance: none;
+}
+
+.formulario-tarjeta .grupo-select i {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	color: #007bff;
+}
+
+.btn-enviar {
+	width: 100%;
+	height: 40px;
+	border: none;
+	background-color: #007bff;
+	color: #fff;
+	font-size: 16px;
+	letter-spacing: 1px;
+	border-radius: 10px;
+	cursor: pointer;
+}

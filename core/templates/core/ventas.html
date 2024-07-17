@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Historial de ventas</title>
+	<link rel="stylesheet" href="{% static "core/css/style.css" %}">
+	<link rel="icon" type="image/x-icon" href="{% static 'core/img/preview_2.png' %}">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+	{% include "./navegacion.html" %}
+	<hr>
+	<div>
+		<button type="button" class="btn me-md-2 btn-custom-outline" style="position: absolute; left: 1rem;" onclick="location.href='{% url 'panel_admin' %}'"><i class="bi bi-caret-left"></i> Volver al panel</button>
+		<h1 class="text-center">Historial de ventas</h1>
+	</div>
+	<br>
+	<main class="container">
+		<table class="table table-striped mt-3">
+			<thead class="sticky-top">
+				<tr>
+					<th>N° de boleta</th>
+					<th>Fecha de venta</th>
+					<th>Cliente</th>
+					<th>Subscrito</th>
+					<th>Total</th>
+					<th>Estado actual</th>
+					<th>Detalle</th>
+					<th>Cambiar estado</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for boleta in boletas %}
+					<tr>
+						<td>#{{boleta.id}}</td>
+						<td>{{boleta.fecha}}</td>
+						<td>{{boleta.cliente.nombres}} {{boleta.cliente.apellidos}}</td>
+						<td>{% if boleta.cliente.subscrito %}Sí{% else %}No{% endif %}</td>
+						<td>${{boleta.total}}</td>
+						<td id="estado_actual{{boleta.id}}">{{boleta.estado_pedido}}</td>
+						<td>
+							<button type="button" class="btn btn-custom-outline btn-sm btnDetalles" id="detalles{{boleta.id}}"><i class="bi bi-journal-text"></i> Ver detalles</button>
+						</td>
+						<td>
+							<div class="btn-group">
+								<input type="radio" class="btn-check" name="estado_pedido{{boleta.id}}" id="estado_anulado{{boleta.id}}" autocomplete="off" {% if boleta.estado_pedido == "Anulado" %}checked{% endif %}>
+								<label class="btn btn-sm btn-outline-danger mx-1" for="estado_anulado{{boleta.id}}">Anulado</label>
+								
+								<input type="radio" class="btn-check" name="estado_pedido{{boleta.id}}" id="estado_en_proceso{{boleta.id}}" autocomplete="off" {% if boleta.estado_pedido == "En proceso" %}checked{% endif %}>
+								<label class="btn btn-sm btn-outline-warning mx-1" for="estado_en_proceso{{boleta.id}}">En proceso</label>
+								
+								<input type="radio" class="btn-check" name="estado_pedido{{boleta.id}}" id="estado_despachado{{boleta.id}}" autocomplete="off" {% if boleta.estado_pedido == "Despachado" %}checked{% endif %}>
+								<label class="btn btn-sm btn-outline-warning mx-1" for="estado_despachado{{boleta.id}}">Despachado</label>
+								
+								<input type="radio" class="btn-check" name="estado_pedido{{boleta.id}}" id="estado_entregado{{boleta.id}}" autocomplete="off" {% if boleta.estado_pedido == "Entregado" %}checked{% endif %}>
+								<label class="btn btn-sm btn-outline-success mx-1" for="estado_entregado{{boleta.id}}">Entregado</label>
+								
+								<input type="radio" class="btn-check" name="estado_pedido{{boleta.id}}" id="estado_vendido{{boleta.id}}" autocomplete="off" {% if boleta.estado_pedido == "Vendido" %}checked{% endif %}>
+								<label class="btn btn-sm btn-outline-success mx-1" for="estado_vendido{{boleta.id}}">Vendido</label>
+							</div>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</main>
+	<hr>
+	{% include './footer.html' %}
+
+	<div class="modal" id="modalDetalleBoleta" tabindex="-1" aria-labelledby="modalDetalleBoleta" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-lg">
+			<div class="modal-content" id="cajaModalFicha">
+				<div class="modal-header" id="modalDetalleBoletaHeader"></div>
+				<div class="modal-body" id="modalDetalleBoletaBody"></div>
+				<div class="modal-footer justify-content-center" id="modalDetalleBoletaFooter"></div>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+	<script type="module">
+		import { formatearFecha } from "/static/core/js/utils.js"
+		import { getCookie } from "/static/core/js/utils.js"
+
+		document.addEventListener("DOMContentLoaded", function() {
+			const boletas = JSON.parse(
+				"{{boletas|safe|escapejs}}".replace(/'/g, '"').replace(/ False/g, " false").replace(/ True/g, " true").replace(/ None/g, " null")
+			)
+
+			const modalHeader = document.getElementById("modalDetalleBoletaHeader")
+			const modalBody = document.getElementById("modalDetalleBoletaBody")
+			const modalFooter = document.getElementById("modalDetalleBoletaFooter")
+
+			boletas.forEach(boleta => {
+				const botonDetalles = document.getElementById(`detalles${boleta.id}`)
+				const productosHTML = boleta.productos.map(producto => `
+					<div class="productoEnBoleta">
+						<img src="${producto.imagen}" alt="${producto.nombre}" style="width: 70px; height: 70px;">
+						<span>(<b class="text-info-emphasis">x${producto.cantidad}</b>) ${producto.nombre}: <b class="text-success-emphasis">$${producto.precio * producto.cantidad}</b></span>
+					</div>
+				`).join("")
+				botonDetalles.addEventListener("click", function() {
+					if (!modalDetalleBoleta.classList.contains("show")) {
+						var modalInstance = new bootstrap.Modal(modalDetalleBoleta)
+						modalHeader.textContent = `Boleta #${boleta.id} | Emitida el ${formatearFecha(boleta.fecha)}`
+						modalBody.innerHTML = `
+							<table id="tablaDatosBoleta" class="table table-dark table-striped">
+								<thead>
+									<tr>
+										<th>Productos comprados</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>${productosHTML}</td>
+									</tr>
+								</tbody>
+							</table>
+							<h5 class="text-center">Total pagado: <b class="text-success-emphasis">$${boleta.total}</b></h5>
+						`
+						modalFooter.innerHTML = `
+							<button class="btn btn-custom-outline" data-bs-dismiss="modal">Cerrar panel</button>
+						`
+						modalInstance.show()
+					}
+				})
+			});
+
+			//Cambiar estado del pedido.
+			const botonesEstado = document.querySelectorAll(".btn-check")
+
+			botonesEstado.forEach(boton => {
+				boton.addEventListener("change", function() {
+					const boletaID = this.getAttribute("name").replace("estado_pedido", "")
+					let estado = this.id.replace("estado_", "").replace(`${boletaID}`, "").replace("_", " ")
+					const nuevoEstado = estado.charAt(0).toUpperCase() + estado.slice(1)
+	
+					fetch(`/actualizar_estado_boleta/${boletaID}/${nuevoEstado}/`, {
+						method: "POST",
+						headers: {
+							"X-CSRFToken": getCookie("csrftoken", document),
+							"Content-Type": "application/json"
+						},
+					})
+					.then(respuesta => respuesta.json())
+					.then(data => { document.querySelector(`#estado_actual${boletaID}`).textContent = data.nuevo_estado })
+					.catch(error => { console.error("Error al enviar la solicitud:", error) })
+				})
+			})
+		})
+	</script>
+</body>
+</html>

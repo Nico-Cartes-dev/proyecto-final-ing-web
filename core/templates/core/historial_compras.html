@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Historial de Compras</title>
+	<link rel="stylesheet" href="{% static "core/css/style.css" %}">
+	<link rel="icon" type="image/x-icon" href="{% static 'core/img/preview_2.png' %}">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+	{% include "./navegacion.html" %}
+	<hr>
+	<div class="container">
+		<h1 class="mt-5 text-center">Historial de compras</h1>
+		<div class="table-responsive">
+			<table class="table table-striped mt-3">
+				<thead class="bg-dark text-white">
+					<tr>
+						<th>N° de boleta</th>
+						<th>Fecha de venta</th>
+						<th>Fecha de despacho</th>
+						<th>Fecha de entrega</th>
+						<th>Total</th>
+						<th>Estado</th>
+						<th>Opciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for boleta in boletas %}
+						<tr>
+							<td>#{{boleta.id}}</td>
+							<td>{{boleta.fecha}}</td>
+							<td>-</td>
+							<td>-</td>
+							<td>${{boleta.total}}</td>
+							<td>{{boleta.estado_pedido}}</td>
+							<td>
+								<button type="button" class="btn btn-custom-outline btn-sm btnDetalles" id="detalles{{boleta.id}}"><i class="bi bi-journal-text"></i> Ver detalles</button>
+							</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<hr>
+	{% include "./footer.html" %}
+
+	<div class="modal" id="modalDetalleBoleta" tabindex="-1" aria-labelledby="modalDetalleBoleta" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-lg">
+			<div class="modal-content" id="cajaModalFicha">
+				<div class="modal-header" id="modalDetalleBoletaHeader"></div>
+				<div class="modal-body" id="modalDetalleBoletaBody"></div>
+				<div class="modal-footer justify-content-center" id="modalDetalleBoletaFooter"></div>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+	<script type="module">
+		import { formatearFecha } from "/static/core/js/utils.js"
+
+		document.addEventListener("DOMContentLoaded", function() {
+			const modalHeader = document.getElementById("modalDetalleBoletaHeader")
+			const modalBody = document.getElementById("modalDetalleBoletaBody")
+			const modalFooter = document.getElementById("modalDetalleBoletaFooter")
+			
+			fetch("{% url 'obtener_boletas_user' %}")
+			.then(respuesta => respuesta.json())
+			.then(data => {
+				if (data.boletas.length > 0) {
+					const modalDetalleBoleta = document.getElementById("modalDetalleBoleta")
+					data.boletas.forEach(boleta => {
+						const botonDetalles = document.getElementById(`detalles${boleta.id}`)
+						const productosHTML = boleta.productos.map(producto => `
+							<div class="productoEnBoleta">
+								<img src="${producto.imagen}" alt="${producto.nombre}" style="width: 70px; height: 70px;">
+								<span>(<b class="text-info-emphasis">x${producto.cantidad}</b>) ${producto.nombre}</span>: <b class="text-success-emphasis">$${producto.precio * producto.cantidad}</b>
+							</div>
+						`).join("")
+						
+						botonDetalles.addEventListener("click", function() {
+							if (!modalDetalleBoleta.classList.contains("show")) {
+								var modalInstance = new bootstrap.Modal(modalDetalleBoleta)
+								modalHeader.textContent = `Boleta #${boleta.id} | Emitida el ${formatearFecha(boleta.fecha)}`
+								modalBody.innerHTML = `
+									<table id="tablaDatosBoleta" class="table table-dark table-striped">
+										<thead>
+											<tr>
+												<th>Productos comprados</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>${productosHTML}</td>
+											</tr>
+										</tbody>
+									</table>
+									<h5 class="text-center">Total pagado: <b class="text-success-emphasis">$${boleta.total}</b></h5>
+								`
+								modalFooter.innerHTML = `
+									<button class="btn btn-custom-outline" data-bs-dismiss="modal">Cerrar panel</button>
+								`
+								modalInstance.show()
+							}
+						})
+					})
+				}
+			})
+			.catch(error => console.error("Error:", error))
+		})
+	</script>
+</body>
+</html>
