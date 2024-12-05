@@ -35,7 +35,7 @@
     <div class="container mt-5">
         <div class="card">
             <div class="card-header">
-                <h2>Formulario de Arriendo de Bicicletas</h2>
+                <h2>Formulario</h2>
             </div>
             <div class="card-body">
                 <form method="post" action="{% url 'guardar_datos' %}">
@@ -44,20 +44,44 @@
 						<input type="text"  class="form-control" id="rut" name="rut" value="{{request.session.cuenta_rut}}">
 					</div>
                     <div class="form-group">
-                        <label for="fechain">Fecha de inicio del arriendo:</label>
+                        <label for="fechain">Fecha de atención:</label>
                         <input type="date" class="form-control" id="fechain" name="fechain">
                     </div>
+                    {%if not request.session.logeado%}
+                        <div class="form-group">
+                            <label for="inmu">Nombre del paciente:</label>
+                            <input type="text" class="form-control" id="inmu" name="inmu"  value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="inqu">Email del paciente:</label>
+                            <input type="email" class="form-control" id="inqu" name="inqu"  value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="rut">rut del paciente:</label>
+                            <input type="text" class="form-control" id="rut" name="rut"  value="" placeholder="12345678-K" required>
+                        </div>
+                    {%else%}
+                        <div class="form-group">
+                            <label for="inmu">Nombre del paciente:</label>
+                            <input type="text" class="form-control" id="inmu" name="inmu" readonly value="{% if request.session.logeado %}{{ request.session.cuenta_nombres }} {{request.session.cuenta_apellidos}}{% endif %}">
+                        </div>
+                        <div class="form-group">
+                            <label for="inqu">Email del paciente:</label>
+                            <input type="email" class="form-control" id="inqu" name="inqu" readonly value="{% if request.session.logeado %}{{ request.session.cuenta_correo }}{% endif %}">
+                        </div>
+                        <div class="form-group">
+                            <label for="rut">rut del paciente:</label>
+                            <input type="text" class="form-control" id="rut" name="rut" readonly value="{% if request.session.logeado %}{{ request.session.cuenta_rut }}{% endif %}" >
+                        </div>
+                    {%endif%}
                     <div class="form-group">
-                        <label for="fechafin">Fecha de fin del arriendo:</label>
-                        <input type="date" class="form-control" id="fechafin" name="fechafin">
-                    </div>
-                    <div class="form-group">
-                        <label for="inmu">Nombre del cliente:</label>
-                        <input type="text" class="form-control" id="inmu" name="inmu" readonly value="{% if request.session.logeado %}{{ request.session.cuenta_nombres }} {{request.session.cuenta_apellidos}}{% endif %}">
-                    </div>
-                    <div class="form-group">
-                        <label for="inqu">Email del cliente:</label>
-                        <input type="email" class="form-control" id="inqu" name="inqu" readonly value="{% if request.session.logeado %}{{ request.session.cuenta_correo }}{% endif %}">
+                        <label for="med">Doctor:</label>
+                        <select class="form-control" id="med" name="med">
+                            <option value="" disabled selected>Seleccione un médico</option>
+                            {% for doctor in doctores %}
+                            <option value="{{ doctor.id }}">{{ doctor.name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Guardar datos</button>
                     <button type="reset" class="btn btn-secondary">Limpiar</button>

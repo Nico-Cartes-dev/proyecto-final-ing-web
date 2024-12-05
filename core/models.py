@@ -1,13 +1,13 @@
 from django.utils import timezone
 from django.db import models
+from .utils import DIAS
 
 # Create your models here.
 class Producto(models.Model):
 	CATEGORIAS = [
-		("Ruta", "Ruta"),
-		("Urbana", "Urbana"),
-		("Montaña", "Montaña"),
-		("Infantil", "Infantil")
+		("Medicina General", "Medicina General"),
+		("Pediatría", "Pediatría"),
+		("Odontologia", "Odontologia")
 	]
 
 	id = models.AutoField(primary_key=True)
@@ -73,21 +73,39 @@ class ProductoEnBoleta(models.Model):
 		return f"{self.producto.nombre} - Cantidad: {self.cantidad}"
 
 class Tarjeta(models.Model):
-    card_number = models.CharField(max_length=19, default=0)
-    card_name = models.CharField(max_length=50 ,default=0)
-    exp_month = models.IntegerField(default=1)
-    exp_year = models.IntegerField(default=2024)
-    ccv = models.CharField(max_length=3 ,default=0)
-    
+	card_number = models.CharField(max_length=19, default=0)
+	card_name = models.CharField(max_length=50 ,default=0)
+	exp_month = models.IntegerField(default=1)
+	exp_year = models.IntegerField(default=2024)
+	ccv = models.CharField(max_length=3 ,default=0)
+	
 
-    def __str__(self):
-        return self.card_number
-    
+	def __str__(self):
+		return self.card_number
+	
 class Arriendo(models.Model):
-    fecha_arriendo= models.DateField()
-    fecha_fin=models.DateField()
-    nombre=models.CharField(max_length=50)
-    
-    def __str__(self):
-        return self.nombre
-    
+	fecha_arriendo = models.DateField()
+	# fecha_fin = models.DateField()
+	nombre = models.CharField(max_length=50)
+	doctor = models.ForeignKey('Doctor', on_delete=models.SET_NULL, null=True, blank=True)
+	hora = models.TimeField(default=timezone.now)
+	rut=models.CharField(max_length=12, null=True, blank=True)
+
+	def __str__(self):
+		return f"{self.nombre} - {self.doctor.name if self.doctor else 'Sin médico'}"
+
+class Doctor(models.Model):
+	name = models.CharField(max_length=100)
+
+	def __str__(self):
+		return self.name
+
+class Availability(models.Model):
+	doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='availabilities')
+	date = models.DateField()
+	# libre = models.JSONField(default=DIAS)
+	available_slots = models.JSONField(default=dict)
+
+
+	def __str__(self):
+		return f"{self.doctor.name} - {self.date}"

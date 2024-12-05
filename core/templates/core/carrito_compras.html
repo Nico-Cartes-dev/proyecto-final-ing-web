@@ -31,7 +31,7 @@
 				<th>Nombre</th>
 				<th>Categoría</th>
 				<th>Precio</th>
-				<th>Precio Arriendo</th>
+				{% comment %} <th>Precio Arriendo</th> {% endcomment %}
 				<th>% Oferta</th>
 				<th>% Dscto. total</th>
 				<th>Cantidad</th>
@@ -60,13 +60,14 @@
 
 	<div id="contenedorBotones" class="text-center" style="display: none;">
 		<button id="btnLimpiarCarrito" class="btn btn-outline-danger mx-2" type="button">Vaciar carrito</button>
-		{% if not request.session.logeado %}
+		{% comment %} {% if not request.session.logeado %}
 			<span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-html="true" data-bs-custom-class="custom-tooltip" data-bs-title="<b class='text-danger-emphasis'>Necesitas iniciar sesión para hacer esto.</b>">
-				<button id="btnConfirmarCompra" type="button" class="btn btn-outline-success mx-2" disabled>Confirmar Arriendo</button>
+				<button id="btnConfirmarCompra" type="button" class="btn btn-outline-success mx-2" disabled>Confirmar Hora</button>
 			</span>
 		{% else %}
-			<button  type="button" class="btn btn-outline-success mx-2" onclick="location.href='{% url 'formulario_arriendo' %}'">Confirmar Arriendo</button>
-		{% endif %}
+			<button  type="button" class="btn btn-outline-success mx-2" onclick="location.href='{% url 'formulario_arriendo' %}'">Confirmar Hora</button>
+		{% endif %} {% endcomment %}
+		<button  type="button" class="btn btn-outline-success mx-2" onclick="location.href='{% url 'formulario_arriendo' %}'">Confirmar Hora</button>
 	</div>
 
 	<hr>

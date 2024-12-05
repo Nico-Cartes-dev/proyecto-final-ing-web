@@ -1,12 +1,15 @@
+from datetime import datetime, timedelta
+import re
 import json
 from .utils import CATEGORIAS_JUEGOS,MESES,AÑOS
-from core.models import Boleta, Cuenta, Producto, ProductoEnBoleta , Tarjeta , Arriendo
+from core.models import Boleta, Cuenta, Producto, ProductoEnBoleta , Tarjeta , Arriendo , Doctor , Availability
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.hashers import check_password, make_password
 from .decoradores import check_rol_admin
+
 
 
 # Create your views here.
@@ -17,9 +20,10 @@ def footer(request): return render(request, "core/footer.html")
 def nosotros(request): return render(request, "core/nosotros.html")
 def error404(request): return render(request, "core/error404.html")
 def tarjeta(request): return render(request, "core/tarjeta.html", {"meses": MESES, "años": AÑOS})
-def formulario_arriendo(request): return render(request, "core/formulario_arriendo.html")
+def formulario_arriendo(request): return render(request, "core/formulario_arriendo.html", {"doctores": get_doctors()})
 def guardar_datos(request): return render(request, "core/guardar_datos.html")
 def transferencia(request): return render(request, "core/transferencia.html")
+def calendar(request): return render(request, "core/calendar.html")
 
 
 
@@ -468,24 +472,60 @@ def guardar_tarjeta(request):
 		tarjeta= Tarjeta(card_number=cardNumber,card_name=cardName,exp_month=expMonth,exp_year=expYear,ccv=ccv)
 		tarjeta.save()
 		messages.success(request, "Tarjeta guardada")
-		return redirect("transferencia")
+		return redirect("historial_compras")
 	return render(request, "core/tarjeta.html")
 
 def guardar_datos(request):
-	if request.method:
-		fecha_inicio= request.POST.get('fechain')
-		fecha_fin= request.POST.get('fechafin')
-		nombres= request.POST.get('inmu')
-		print(request.POST)
-		print(fecha_inicio,fecha_fin,nombres)
-		if not all([fecha_inicio,fecha_fin,nombres]):
+	if request.method == "POST":
+		doctores = Doctor.objects.all()
+		# print(doctores)
+		fecha_inicio = request.POST.get('fechain')
+		# print(fecha_inicio)
+		nombres = request.POST.get('inmu')
+		doctor_id = request.POST.get('med')
+		rut= request.POST.get('rut')
+		# hora= request.POST.get('hora')
+		
+		if not all([fecha_inicio, nombres, doctor_id,rut]):
 			messages.error(request, "Todos los campos son requeridos.")
 			return redirect("formulario_arriendo")
-		farriendo= Arriendo(fecha_arriendo=fecha_inicio, fecha_fin=fecha_fin,nombre=nombres)
-		farriendo.save()
-		messages.success(request, "Datos guardados")
-		return redirect("tarjeta")
-	return render(request, "core/formulario_arriendo.html")
+		if not re.match(r"^(\d{1,2}(\d{3}){0,2}-[\dkK])$" , rut):
+			messages.error(request, "El rut no es valido")
+			return redirect("formulario_arriendo")
+		if datetime.strptime(fecha_inicio, "%Y-%m-%d").date() < datetime.now().date():
+			messages.error(request, "La fecha seleccionada no es válida.")
+			return redirect("formulario_arriendo")
+		if datetime.strptime(fecha_inicio, "%Y-%m-%d").date() > datetime.strptime((datetime.now()+ timedelta(days=90)).strftime("%Y-%m-%d"), "%Y-%m-%d").date() :
+			messages.error(request, "No hay fechas para más de 3 meses.")
+			return redirect("formulario_arriendo")
+		if fecha_inicio in get_doctor_availability(doctor_id=doctor_id,fecha_inicio=fecha_inicio):
+			messages.error(request, "La fecha seleccionada esta reservada.")
+			return redirect("formulario_arriendo")
+		
+		
+		try:
+			doctor = Doctor.objects.get(id=doctor_id)
+			arriendo = Arriendo(fecha_arriendo=fecha_inicio, nombre=nombres, doctor=doctor,rut=rut)	
+			arriendo.save()
+			messages.success(request, "Datos guardados")
+			return redirect("tarjeta")
+		except Doctor.DoesNotExist:
+			messages.error(request, "Médico no encontrado.")
+			return redirect("formulario_arriendo")
+
+	doctores = Doctor.objects.all()
+	return render(request, "core/formulario_arriendo.html", {"doctores": doctores})
+	# return render(request, "core/formulario_arriendo.html")
 
 
-	
+def get_doctor_availability(doctor_id,fecha_inicio):
+	try:
+		arriendos=Arriendo.objects.filter(doctor_id=doctor_id,fecha_arriendo=fecha_inicio)
+		arriendo_lista=[arriendos.fecha_arriendo.strftime("%Y-%m-%d") for arriendos in arriendos]
+		# print(arriendo_lista)
+		return arriendo_lista
+	except Arriendo.DoesNotExist:
+		return JsonResponse({"error": "Disponibilidad no encontrada"}, status=404)
+
+def get_doctors():
+	return Doctor.objects.all()

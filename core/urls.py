@@ -9,7 +9,7 @@ from .views import (
 	obtener_productos, actualizar_cuenta, actualizar_producto,
     crear_boleta, verificar_boletas, actualizar_estado_boleta,
     eliminar_cuenta, error404, actualizar_cuenta_admin,tarjeta,guardar_tarjeta,
-    formulario_arriendo,guardar_datos,transferencia
+    formulario_arriendo,guardar_datos,transferencia,get_doctor_availability,get_doctors,calendar
 )
 
 urlpatterns = [
@@ -48,7 +48,13 @@ urlpatterns = [
 	path('guardar_tarjeta/', guardar_tarjeta, name='guardar_tarjeta'),
 	path('formulario_arriendo', formulario_arriendo, name='formulario_arriendo'),
 	path('guardar_datos/', guardar_datos, name='guardar_datos'),
-	path('transferencia',transferencia, name='transferencia')
+	path('transferencia',transferencia, name='transferencia'),
+ 	path('availability/<int:doctor_id>/',get_doctor_availability, name='doctor_availability'),
+	path('doctors/', get_doctors, name='get_doctors'),
+	path('calendario/', calendar, name='calendar'),
+	# path('generar-agenda/', generar_agenda_base, name='generar_agenda'),
+    # path('cancelar-cita/<int:agenda_id>/', cancelar_cita, name='cancelar_cita'),
+	# path('reporte-recaudacion/', generar_informe_recaudacion, name='reporte_recaudacion'),
 ]
 
 

@@ -133,7 +133,7 @@ export async function mostrarFichaProducto(juegosEnPagina, i) {
 		let badge;
 
 		if (juego.stock > 0) {
-			badge = `<span class="badge text-bg-success">Disponible</span>`;
+			badge = `<span class="badge text-bg-success">Hora Disponible</span>`;
 			if (juego.en_descuento) {
 				badge += ` <span class="badge text-bg-info">Oferta</span>`;
 			}
@@ -161,7 +161,7 @@ export async function mostrarFichaProducto(juegosEnPagina, i) {
 						<p class="card-text">${juego.descripcion}</p>
 					</div>
 					<div class="card-footer text-center mt-auto">
-						<b>Precio:</b> <span class="text-success-emphasis">$${juego.precio}</span> • <b>Oferta:</b> ${precioAnteriorHTML} ${porcentajeDescuentoHTML} • <b>Stock:</b> <span class="text-warning-emphasis">${juego.stock}</span>
+						<b>Precio:</b> <span class="text-success-emphasis">$${juego.precio}</span> • <b>Precio fonasa:</b> ${precioAnteriorHTML} ${porcentajeDescuentoHTML} • <b>Stock:</b> <span class="text-warning-emphasis">${juego.stock}</span>
 					</div>
 				</div>
 			</div>
@@ -185,12 +185,12 @@ export async function mostrarFichaProducto(juegosEnPagina, i) {
 		var btnAñadirFavorito = document.getElementById(`searchToastFav${i}`)
 
 		btnAñadirCarrito.addEventListener("click", function() {
-			sendToast("Juego agregado al carrito de compras", `Agregaste ${juego.nombre}.`, "success-subtle");
+			sendToast("Hora reservada", `Agregaste ${juego.nombre}.`, "success-subtle");
 			agregarAlCarrito(juego);
 		})
 
 		btnComprarAhora.addEventListener("click", function() {
-			sendToast("Juego comprado", `Se compró ${juego.nombre}.`, "success-subtle")
+			sendToast("Hora reservada", `Se compró ${juego.nombre}.`, "success-subtle")
 		})
 
 		btnAñadirFavorito.addEventListener("click", function() {

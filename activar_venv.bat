@@ -1,3 +1,3 @@
 @echo off 
-call C:\Users\anaki\Documents\GitHub\proyecxto\.venv\Scripts\activate.bat
+call C:\Users\anaki\Documents\GitHub\proyecto-final-ing-web\.venv\Scripts\activate.bat
 
