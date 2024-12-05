@@ -52,13 +52,13 @@
 								<label class="btn btn-sm btn-outline-warning mx-1" for="estado_en_proceso{{boleta.id}}">En proceso</label>
 								
 								<input type="radio" class="btn-check" name="estado_pedido{{boleta.id}}" id="estado_despachado{{boleta.id}}" autocomplete="off" {% if boleta.estado_pedido == "Despachado" %}checked{% endif %}>
-								<label class="btn btn-sm btn-outline-warning mx-1" for="estado_despachado{{boleta.id}}">Despachado</label>
+								<label class="btn btn-sm btn-outline-warning mx-1" for="estado_despachado{{boleta.id}}">Reservada</label>
 								
 								<input type="radio" class="btn-check" name="estado_pedido{{boleta.id}}" id="estado_entregado{{boleta.id}}" autocomplete="off" {% if boleta.estado_pedido == "Entregado" %}checked{% endif %}>
-								<label class="btn btn-sm btn-outline-success mx-1" for="estado_entregado{{boleta.id}}">Entregado</label>
+								<label class="btn btn-sm btn-outline-success mx-1" for="estado_entregado{{boleta.id}}">En espera</label>
 								
 								<input type="radio" class="btn-check" name="estado_pedido{{boleta.id}}" id="estado_vendido{{boleta.id}}" autocomplete="off" {% if boleta.estado_pedido == "Vendido" %}checked{% endif %}>
-								<label class="btn btn-sm btn-outline-success mx-1" for="estado_vendido{{boleta.id}}">Vendido</label>
+								<label class="btn btn-sm btn-outline-success mx-1" for="estado_vendido{{boleta.id}}">Atendido</label>
 							</div>
 						</td>
 					</tr>
